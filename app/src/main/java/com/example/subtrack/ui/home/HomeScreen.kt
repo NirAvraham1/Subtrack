@@ -4,12 +4,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed // <-- שינוי: שימוש ב-Indexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.SmartToy // אייקון הרובוט
+import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.subtrack.R
+import com.example.subtrack.utils.NativeAdCard // <-- הוספנו את האימפורט הזה
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,7 +29,7 @@ fun HomeScreen(
     onAddExpenseClick: () -> Unit,
     onExpenseClick: (Int) -> Unit,
     onSettingsClick: () -> Unit,
-    onAiAdvisorClick: () -> Unit, // <-- הוספנו את הפרמטר הזה!
+    onAiAdvisorClick: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val expenses by viewModel.expenses.collectAsState()
@@ -59,7 +60,7 @@ fun HomeScreen(
                 }
             )
         },
-        // --- השינוי הגדול: שני כפתורים צפים (AI + Add) ---
+        // --- שני כפתורים צפים (AI + Add) ---
         floatingActionButton = {
             Row(
                 modifier = Modifier
@@ -80,17 +81,15 @@ fun HomeScreen(
                     containerColor = if (currentPlan == "ai") MaterialTheme.colorScheme.primary else Color.LightGray,
                     contentColor = Color.White
                 ) {
-                    // --- השינוי כאן: בדיקה איזה אייקון להציג ---
+                    // בדיקה איזה אייקון להציג
                     if (currentPlan == "ai") {
-                        // מצב פעיל: מציג את האייקון המיוחד שלך
                         Icon(
                             painter = painterResource(id = R.drawable.ai_icon),
                             contentDescription = "AI Advisor",
-                            modifier = Modifier.size(24.dp), // גודל סטנדרטי לאייקון
-                            tint = Color.White // צובע את האייקון בלבן כדי שיראה יפה על הרקע הכחול
+                            modifier = Modifier.size(24.dp),
+                            tint = Color.White
                         )
                     } else {
-                        // מצב נעול: מציג מנעול רגיל
                         Icon(
                             imageVector = Icons.Default.Lock,
                             contentDescription = "Locked",
@@ -145,10 +144,25 @@ fun HomeScreen(
 
             Text("YOUR SUBSCRIPTIONS", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(bottom = 8.dp, start = 4.dp))
 
+            // --- הרשימה עם הפרסומות ---
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(expenses) { expense ->
+
+                itemsIndexed(expenses) { index, expense ->
+                    // 1. כרטיס ההוצאה הרגיל
                     Box(modifier = Modifier.clickable { onExpenseClick(expense.id) }) {
                         ExpenseCard(expense = expense)
+                    }
+
+                    // 2. לוגיקת המודעה:
+                    // אם המשתמש הוא 'free', וזה הפריט השלישי (3, 6, 9...) -> הצג מודעה
+                    if (currentPlan == "free" && (index + 1) % 3 == 0) {
+                        // מרווח קטן לפני המודעה כדי שיראה טוב
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        NativeAdCard()
+
+                        // מרווח קטן אחרי המודעה
+                        Spacer(modifier = Modifier.height(4.dp))
                     }
                 }
             }

@@ -2,7 +2,7 @@ package com.example.subtrack.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.subtrack.data.local.UserPreferences // <-- הוסף אימפורט
+import com.example.subtrack.data.local.UserPreferences
 import com.example.subtrack.data.local.dao.ExpenseDao
 import com.example.subtrack.data.local.entity.ExpenseFrequency
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,10 +14,9 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     dao: ExpenseDao,
-    userPreferences: UserPreferences // <-- הזרקנו את זה (זה היה חסר)
+    userPreferences: UserPreferences
 ) : ViewModel() {
 
-    // --- הוספנו את זה: קריאת המנוי הנוכחי למסך הבית ---
     val currentPlan = userPreferences.subscriptionFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "free")
 
@@ -26,9 +25,18 @@ class HomeViewModel @Inject constructor(
 
     val totalMonthlyCost = expenses.map { list ->
         list.sumOf { expense ->
-            when (expense.frequency) {
-                ExpenseFrequency.MONTHLY -> expense.amount
-                ExpenseFrequency.YEARLY -> expense.amount / 12
+
+            // --- בדיקה חדשה: האם אנחנו בתוך תקופת ניסיון? ---
+            val isTrial = System.currentTimeMillis() < expense.firstPaymentDate
+
+            if (isTrial) {
+                0.0 // אם זה ניסיון, העלות היא 0
+            } else {
+                // חישוב רגיל
+                when (expense.frequency) {
+                    ExpenseFrequency.MONTHLY -> expense.amount
+                    ExpenseFrequency.YEARLY -> expense.amount / 12
+                }
             }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)

@@ -4,7 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
@@ -30,7 +30,7 @@ fun SettingsScreen(
 ) {
     val currentPlan by viewModel.currentPlan.collectAsState()
     val isNotificationsEnabled by viewModel.isNotificationsEnabled.collectAsState()
-    val selectedDays by viewModel.notificationAdvanceDays.collectAsState() // קריאת הימים
+    val selectedDays by viewModel.notificationAdvanceDays.collectAsState()
 
     var showUpgradeDialog by remember { mutableStateOf(false) }
 
@@ -47,15 +47,19 @@ fun SettingsScreen(
             TopAppBar(
                 title = { Text("Settings", fontWeight = FontWeight.Bold, color = Color.White) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) { Icon(Icons.Default.ArrowBack, "Back", tint = Color.White) }
+                    IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Color.White) }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
             )
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
+
         Column(
-            modifier = Modifier.padding(paddingValues).padding(16.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
@@ -88,12 +92,18 @@ fun SettingsScreen(
                 }
             )
 
-            // --- בחירת תזמון (רק אם ההתראות דולקות) ---
+            // בחירת תזמון
             if (isNotificationsEnabled) {
                 NotificationTimingSelector(
                     selectedDays = selectedDays,
                     onOptionSelected = { days -> viewModel.setNotificationAdvanceDays(days) }
                 )
+            }
+
+            // --- לוגיקת הסתרת הבאנר ---
+            if (currentPlan == "free") {
+                Spacer(modifier = Modifier.weight(1f)) // דוחף למטה
+                com.example.subtrack.ui.AdBanner()
             }
         }
 
@@ -116,6 +126,7 @@ fun SettingsScreen(
     }
 }
 
+// ... (שאר הרכיבים למטה נשארים זהים, לא צריך להעתיק שוב) ...
 @Composable
 fun SettingsButton(title: String, color: Color, isLocked: Boolean = false, onClick: () -> Unit) {
     Card(
@@ -187,7 +198,6 @@ fun NotificationSwitchCard(
     }
 }
 
-// --- רכיב חדש: בחירת זמן ---
 @Composable
 fun NotificationTimingSelector(
     selectedDays: Int,

@@ -7,7 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
@@ -35,14 +35,13 @@ data class SubscriptionPlan(
 @Composable
 fun SubscriptionScreen(
     onNavigateBack: () -> Unit,
-    viewModel: SubscriptionViewModel = hiltViewModel() // הזרקת ה-ViewModel
+    viewModel: SubscriptionViewModel = hiltViewModel()
 ) {
-
-    // קוראים את המנוי הנוכחי מהזיכרון
     val currentPlanId by viewModel.currentPlan.collectAsState()
-
-    // משתנה מקומי לבחירה הזמנית במסך (לפני שלוחצים "המשך")
     var selectedPlanId by remember(currentPlanId) { mutableStateOf(currentPlanId) }
+
+    // --- משתנה לניהול הפופ-אפ ---
+    var showConfirmationDialog by remember { mutableStateOf(false) }
 
     val plans = listOf(
         SubscriptionPlan("free", "Starter", "Free", listOf("Basic Tracking", "Monthly Summary"), color = Color.Gray),
@@ -50,22 +49,42 @@ fun SubscriptionScreen(
         SubscriptionPlan("ai", "Ultimate AI", "$10 / month", listOf("AI Advisor", "History", "Notifications"), isRecommended = true, color = Color(0xFFE91E63))
     )
 
+    // מציאת אובייקט התוכנית שנבחרה (כדי להציג את שמה בדיאלוג)
+    val selectedPlan = plans.find { it.id == selectedPlanId }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Choose Your Plan", fontWeight = FontWeight.Bold, color = Color.White) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) { Icon(Icons.Default.ArrowBack, "Back", tint = Color.White) }
+                    IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Color.White) }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        Column(modifier = Modifier.padding(paddingValues).padding(16.dp)) {
 
-            Text("Select a plan to unlock features", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 16.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp)
+        ) {
+            Text(
+                "Unlock the full potential of SubTrack",
+                style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
 
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.weight(1f)) {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.weight(1f)
+            ) {
                 items(plans) { plan ->
                     PlanCard(
                         plan = plan,
@@ -77,23 +96,75 @@ fun SubscriptionScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // --- הכפתור הראשי ---
             Button(
                 onClick = {
-                    // --- כאן אנחנו שומרים את הבחירה לזיכרון ---
-                    viewModel.selectPlan(selectedPlanId)
-                    onNavigateBack()
+                    if (selectedPlanId == currentPlanId) {
+                        // אם לא שינינו כלום, פשוט סוגרים את המסך
+                        onNavigateBack()
+                    } else {
+                        // אם שינינו תוכנית -> פותחים את הדיאלוג לאישור
+                        showConfirmationDialog = true
+                    }
                 },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (selectedPlanId == "free") Color.Gray else MaterialTheme.colorScheme.primary
+                )
             ) {
-                Text(if (selectedPlanId == currentPlanId) "Close" else "Update Plan", fontSize = 18.sp)
+                Text(
+                    text = if (selectedPlanId == currentPlanId) "Close" else "Update Plan",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
+        }
+
+        // --- דיאלוג אישור החלפת מנוי ---
+        if (showConfirmationDialog && selectedPlan != null) {
+            AlertDialog(
+                onDismissRequest = { showConfirmationDialog = false },
+                containerColor = Color.White,
+                title = {
+                    Text(
+                        text = "Confirm Subscription",
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                },
+                text = {
+                    Text(
+                        text = "Are you sure you want to switch your plan to ${selectedPlan.title}?\n\nPrice: ${selectedPlan.price}",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            // --- כאן קורית השמירה האמיתית ---
+                            viewModel.selectPlan(selectedPlanId)
+                            showConfirmationDialog = false
+                            onNavigateBack()
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text("Confirm", fontWeight = FontWeight.Bold)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showConfirmationDialog = false }) {
+                        Text("Cancel", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                    }
+                }
+            )
         }
     }
 }
 
-// ... (ה-PlanCard נשאר זהה לקוד הקודם, תשאיר אותו למטה)
 @Composable
 fun PlanCard(
     plan: SubscriptionPlan,
@@ -115,7 +186,6 @@ fun PlanCard(
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
 
-                // כותרת ומחיר
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -135,7 +205,6 @@ fun PlanCard(
                         )
                     }
 
-                    // אם נבחר - מציג וי
                     if (isSelected) {
                         Icon(
                             imageVector = Icons.Default.Check,
@@ -148,7 +217,6 @@ fun PlanCard(
 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
 
-                // רשימת הפיצ'רים
                 plan.features.forEach { feature ->
                     Row(
                         modifier = Modifier.padding(vertical = 4.dp),
@@ -157,7 +225,7 @@ fun PlanCard(
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = null,
-                            tint = Color(0xFF4CAF50), // ירוק לפיצ'רים
+                            tint = Color(0xFF4CAF50),
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -171,7 +239,6 @@ fun PlanCard(
             }
         }
 
-        // תגית "מומלץ" (Recommended) צפה למעלה
         if (plan.isRecommended) {
             Surface(
                 color = plan.color,

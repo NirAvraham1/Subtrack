@@ -95,10 +95,15 @@ fun AppNavigation() {
             )
         }
 
+        // --- מסך היסטוריה ---
         composable(Routes.HISTORY) {
             HistoryScreen(
                 onNavigateBack = {
                     navController.popBackStack()
+                },
+                // --- החיבור החדש: מעבר לעריכה עם ה-ID ---
+                onExpenseClick = { expenseId ->
+                    navController.navigate("${Routes.ADD_EXPENSE}?expenseId=$expenseId")
                 }
             )
         }

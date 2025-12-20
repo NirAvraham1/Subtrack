@@ -1,11 +1,11 @@
 package com.example.subtrack.ui.settings
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -22,9 +22,9 @@ import com.example.subtrack.ui.home.ExpenseCard
 @Composable
 fun HistoryScreen(
     onNavigateBack: () -> Unit,
+    onExpenseClick: (Int) -> Unit, // <-- הפרמטר החדש: פונקציה שמקבלת ID
     viewModel: HistoryViewModel = hiltViewModel()
 ) {
-    // מאזינים לרשימת ההיסטוריה מה-ViewModel
     val historyExpenses by viewModel.historyExpenses.collectAsState()
 
     Scaffold(
@@ -61,7 +61,6 @@ fun HistoryScreen(
                 .padding(16.dp)
         ) {
             if (historyExpenses.isEmpty()) {
-                // מצב ריק: אם אין היסטוריה
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -73,7 +72,6 @@ fun HistoryScreen(
                     )
                 }
             } else {
-                // הצגת הרשימה
                 Text(
                     text = "EXPIRED SUBSCRIPTIONS",
                     style = MaterialTheme.typography.labelMedium,
@@ -85,8 +83,10 @@ fun HistoryScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(historyExpenses) { expense ->
-                        // שימוש חוזר בכרטיס המעוצב שלנו!
-                        ExpenseCard(expense = expense)
+                        // --- השינוי: הוספת יכולת לחיצה ---
+                        Box(modifier = Modifier.clickable { onExpenseClick(expense.id) }) {
+                            ExpenseCard(expense = expense)
+                        }
                     }
                 }
             }

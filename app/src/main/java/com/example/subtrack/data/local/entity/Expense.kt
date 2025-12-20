@@ -3,7 +3,6 @@ package com.example.subtrack.data.local.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-
 enum class ExpenseFrequency {
     MONTHLY, YEARLY
 }
@@ -12,6 +11,7 @@ enum class ExpenseFrequency {
 data class Expense(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
+
     val name: String,
     val amount: Double,
     val category: String,
@@ -20,5 +20,8 @@ data class Expense(
     val dateAdded: Long = System.currentTimeMillis(),
     val startDate: Long,
     val endDate: Long? = null,
+
+    val firstPaymentDate: Long,
+
     val renewalDate: Long
 )

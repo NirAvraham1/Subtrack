@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.subtrack.data.local.entity.Expense
 import com.example.subtrack.ui.theme.ErrorRed
 import com.example.subtrack.ui.theme.TealAccent
@@ -25,6 +26,10 @@ import java.util.Locale
 
 @Composable
 fun ExpenseCard(expense: Expense) {
+
+    // בדיקה: האם אנחנו בתקופת ניסיון?
+    val isTrial = System.currentTimeMillis() < expense.firstPaymentDate
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -39,26 +44,46 @@ fun ExpenseCard(expense: Expense) {
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 1. האייקון בצד שמאל
+            // 1. האייקון
             CategoryIcon(category = expense.category)
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            // 2. הטקסט באמצע
+            // 2. הטקסט
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = expense.name.uppercase(),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = expense.name.uppercase(),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    // --- תווית FREE TRIAL ---
+                    if (isTrial) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Surface(
+                            color = Color(0xFF3B8E8E), // כתום
+                            shape = RoundedCornerShape(4.dp)
+                        ) {
+                            Text(
+                                text = "FREE TRIAL",
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(4.dp))
 
+                // אם זה טריאל, אפשר להראות שהעלות היא 0 כרגע, או להשאיר את העלות העתידית
                 Text(
-                    text = "Monthly costs: ${expense.amount} ₪",
+                    text = if (isTrial) "Trial Period (Future: ${expense.amount} ₪)" else "Monthly costs: ${expense.amount} ₪",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = if (isTrial) Color(0xFF3B8E8E) else MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = "Renewal date: ${convertMillisToDate(expense.renewalDate)}",
@@ -82,13 +107,13 @@ fun CategoryIcon(category: String) {
     Box(
         modifier = Modifier
             .size(48.dp)
-            .background(color.copy(alpha = 0.2f), CircleShape),
+            .background(Color(0xFFD1E4F6), CircleShape),
         contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = color,
+            tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(24.dp)
         )
     }

@@ -5,6 +5,7 @@ plugins {
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -61,7 +62,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     // --- Room ---
-    val roomVersion = "2.6.1" // <--- הוסף את השורה הזו!
+    val roomVersion = "2.6.1"
 
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
@@ -88,4 +89,10 @@ dependencies {
     kapt("androidx.hilt:hilt-compiler:1.2.0")
 
     implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+
+    implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.android.gms:play-services-ads:23.3.0")
+
+    implementation("androidx.cardview:cardview:1.0.0")
 }

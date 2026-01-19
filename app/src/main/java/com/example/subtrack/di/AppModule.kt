@@ -13,23 +13,23 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 @Module
-@InstallIn(SingletonComponent::class) // המודול הזה יחיה כל עוד האפליקציה חיה
+@InstallIn(SingletonComponent::class)
 object AppModule {
 
-    // פונקציה שמלמדת את Hilt איך ליצור את מסד הנתונים
+
     @Provides
     @Singleton
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
         return Room.databaseBuilder(
             context,
             AppDatabase::class.java,
-            "subtrack_database" // שם הקובץ שיישמר בטלפון
+            "subtrack_database"
         )
-            .fallbackToDestructiveMigration() // מוחק ובונה מחדש אם משנים את הטבלה (נוח לפיתוח)
+            .fallbackToDestructiveMigration()
             .build()
     }
 
-    // פונקציה שמלמדת את Hilt איך לספק את ה-DAO
+
     @Provides
     @Singleton
     fun provideExpenseDao(database: AppDatabase): ExpenseDao {

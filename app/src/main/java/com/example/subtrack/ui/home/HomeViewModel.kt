@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.subtrack.data.local.UserPreferences
 import com.example.subtrack.data.local.dao.ExpenseDao
 import com.example.subtrack.data.local.entity.ExpenseFrequency
+import com.example.subtrack.utils.AnalyticsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
@@ -14,7 +15,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     dao: ExpenseDao,
-    userPreferences: UserPreferences
+    userPreferences: UserPreferences,
+    private val analyticsManager: AnalyticsManager
 ) : ViewModel() {
 
     val currentPlan = userPreferences.subscriptionFlow
@@ -26,13 +28,12 @@ class HomeViewModel @Inject constructor(
     val totalMonthlyCost = expenses.map { list ->
         list.sumOf { expense ->
 
-            // --- בדיקה חדשה: האם אנחנו בתוך תקופת ניסיון? ---
             val isTrial = System.currentTimeMillis() < expense.firstPaymentDate
 
             if (isTrial) {
-                0.0 // אם זה ניסיון, העלות היא 0
+                0.0
             } else {
-                // חישוב רגיל
+
                 when (expense.frequency) {
                     ExpenseFrequency.MONTHLY -> expense.amount
                     ExpenseFrequency.YEARLY -> expense.amount / 12
@@ -40,4 +41,9 @@ class HomeViewModel @Inject constructor(
             }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
+
+
+    fun onFreeUserAiClicked() {
+        analyticsManager.logFreeUserClickedAI()
+    }
 }

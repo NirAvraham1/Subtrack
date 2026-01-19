@@ -1,5 +1,6 @@
 package com.example.subtrack.ui.settings
 
+import AdBanner
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -103,7 +104,7 @@ fun SettingsScreen(
             // --- לוגיקת הסתרת הבאנר ---
             if (currentPlan == "free") {
                 Spacer(modifier = Modifier.weight(1f)) // דוחף למטה
-                com.example.subtrack.ui.AdBanner()
+                AdBanner()
             }
         }
 
@@ -126,7 +127,6 @@ fun SettingsScreen(
     }
 }
 
-// ... (שאר הרכיבים למטה נשארים זהים, לא צריך להעתיק שוב) ...
 @Composable
 fun SettingsButton(title: String, color: Color, isLocked: Boolean = false, onClick: () -> Unit) {
     Card(

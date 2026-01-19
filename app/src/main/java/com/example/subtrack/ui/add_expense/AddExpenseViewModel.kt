@@ -7,6 +7,7 @@ import com.example.subtrack.data.local.UserPreferences // <-- חשוב!
 import com.example.subtrack.data.local.dao.ExpenseDao
 import com.example.subtrack.data.local.entity.Expense
 import com.example.subtrack.data.local.entity.ExpenseFrequency
+import com.example.subtrack.utils.AnalyticsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,7 +20,8 @@ import javax.inject.Inject
 @HiltViewModel
 class AddExpenseViewModel @Inject constructor(
     private val expenseDao: ExpenseDao,
-    private val userPreferences: UserPreferences, // <-- הוספנו את זה לבנאי
+    private val userPreferences: UserPreferences,
+    private val analyticsManager: AnalyticsManager,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -84,6 +86,9 @@ class AddExpenseViewModel @Inject constructor(
 
         viewModelScope.launch {
             expenseDao.insertExpense(expense)
+            // --- דיווח ל-Analytics ---
+            val doubleAmount = amount.toDoubleOrNull() ?: 0.0
+            analyticsManager.logExpenseAdded(category, doubleAmount)
         }
     }
 

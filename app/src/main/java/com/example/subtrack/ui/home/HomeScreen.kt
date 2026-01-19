@@ -4,12 +4,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed // <-- שינוי: שימוש ב-Indexed
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.subtrack.R
-import com.example.subtrack.utils.NativeAdCard // <-- הוספנו את האימפורט הזה
+import com.example.subtrack.utils.NativeAdCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,9 +33,8 @@ fun HomeScreen(
 ) {
     val expenses by viewModel.expenses.collectAsState()
     val totalCost by viewModel.totalMonthlyCost.collectAsState()
-    val currentPlan by viewModel.currentPlan.collectAsState() // בדיקת המנוי
+    val currentPlan by viewModel.currentPlan.collectAsState()
 
-    // דיאלוג שדרוג (אם לוחצים על ה-AI בלי מנוי)
     var showUpgradeDialog by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -60,28 +58,29 @@ fun HomeScreen(
                 }
             )
         },
-        // --- שני כפתורים צפים (AI + Add) ---
         floatingActionButton = {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 32.dp),
-                horizontalArrangement = Arrangement.SpaceBetween, // מרווח בין הצדדים
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Bottom
             ) {
-                // 1. כפתור AI (צד שמאל) 🤖
+                // 1. כפתור AI
                 FloatingActionButton(
                     onClick = {
                         if (currentPlan == "ai") {
                             onAiAdvisorClick()
                         } else {
+                            // --- התיקון כאן ---
+                            // במקום analyticsManager ישירות, אנחנו קוראים דרך ה-ViewModel
+                            viewModel.onFreeUserAiClicked()
                             showUpgradeDialog = true
                         }
                     },
                     containerColor = if (currentPlan == "ai") MaterialTheme.colorScheme.primary else Color.LightGray,
                     contentColor = Color.White
                 ) {
-                    // בדיקה איזה אייקון להציג
                     if (currentPlan == "ai") {
                         Icon(
                             painter = painterResource(id = R.drawable.ai_icon),
@@ -98,7 +97,7 @@ fun HomeScreen(
                     }
                 }
 
-                // 2. כפתור הוספה רגיל (צד ימין) ➕
+                // 2. כפתור הוספה
                 FloatingActionButton(
                     onClick = onAddExpenseClick,
                     containerColor = MaterialTheme.colorScheme.primary,
@@ -118,7 +117,7 @@ fun HomeScreen(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            // --- הבאנר העליון ---
+            // --- באנר הוצאות ---
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -144,24 +143,17 @@ fun HomeScreen(
 
             Text("YOUR SUBSCRIPTIONS", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(bottom = 8.dp, start = 4.dp))
 
-            // --- הרשימה עם הפרסומות ---
+            // --- רשימה עם פרסומות ---
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
 
                 itemsIndexed(expenses) { index, expense ->
-                    // 1. כרטיס ההוצאה הרגיל
                     Box(modifier = Modifier.clickable { onExpenseClick(expense.id) }) {
                         ExpenseCard(expense = expense)
                     }
 
-                    // 2. לוגיקת המודעה:
-                    // אם המשתמש הוא 'free', וזה הפריט השלישי (3, 6, 9...) -> הצג מודעה
                     if (currentPlan == "free" && (index + 1) % 3 == 0) {
-                        // מרווח קטן לפני המודעה כדי שיראה טוב
                         Spacer(modifier = Modifier.height(4.dp))
-
                         NativeAdCard()
-
-                        // מרווח קטן אחרי המודעה
                         Spacer(modifier = Modifier.height(4.dp))
                     }
                 }
@@ -177,7 +169,7 @@ fun HomeScreen(
                 confirmButton = {
                     Button(onClick = {
                         showUpgradeDialog = false
-                        onSettingsClick() // שולח להגדרות כדי לשדרג
+                        onSettingsClick()
                     }) { Text("Upgrade Plan") }
                 },
                 dismissButton = {

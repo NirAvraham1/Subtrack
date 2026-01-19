@@ -27,7 +27,7 @@ class GeminiAdvisorViewModel @Inject constructor(
 ) : ViewModel() {
 
     // --- המפתח שלך כאן (אל תשכח למחוק לפני העלאה!) ---
-    private val apiKey = "API_KEY_HERE"
+    private val apiKey = "API_KEY"
 
     // המודל של ג'מיני
     private val generativeModel = GenerativeModel(
@@ -35,7 +35,6 @@ class GeminiAdvisorViewModel @Inject constructor(
         apiKey = apiKey
     )
 
-    // רשימת ההודעות ל-UI
     var messages by mutableStateOf(listOf(
         ChatMessage("Hello! I'm your AI Financial Advisor. I have access to your subscription data. Ask me anything!", false)
     ))

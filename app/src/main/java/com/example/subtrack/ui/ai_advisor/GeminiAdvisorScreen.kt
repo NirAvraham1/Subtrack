@@ -33,7 +33,6 @@ fun GeminiAdvisorScreen(
                 title = { Text("AI Advisor", fontWeight = FontWeight.Bold, color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        // חץ חזור - כן צריך להיות AutoMirrored (מתהפך בעברית)
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Color.White)
                     }
                 },
@@ -104,9 +103,7 @@ fun ChatBubble(message: ChatMessage) {
 
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = alignment) {
         Row(verticalAlignment = Alignment.Top) {
-            // אם זה ה-AI, מציגים את האייקון בצד
             if (!message.isUser) {
-                // --- התיקון כאן: שימוש ב-Default במקום AutoMirrored ---
                 Icon(
                     imageVector = Icons.Default.AutoAwesome,
                     contentDescription = null,

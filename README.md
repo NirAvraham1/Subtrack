@@ -62,4 +62,4 @@ Sync Gradle and Run on an Emulator/Device.
 
 ## 👨‍💻 Author
 Nir Avraham Computer Science Student @ Afeka College
-LinkedIn | GitHub
+

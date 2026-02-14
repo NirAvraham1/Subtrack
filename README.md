@@ -55,7 +55,7 @@ The app follows the **MVVM** architecture to ensure separation of concerns and t
 
 ## 🔧 Setup & Installation
 Clone the repository:
-git clone [https://github.com/YOUR_USERNAME/SubTrack.git](https://github.com/YOUR_USERNAME/SubTrack.git)
+git clone [https://github.com/YOUR_USERNAME/SubTrack.git](https://github.com/NirAvraham1/SubTrack.git)
 Open the project in Android Studio.
 Add your API Keys in local.properties (Gemini API Key).
 Sync Gradle and Run on an Emulator/Device.

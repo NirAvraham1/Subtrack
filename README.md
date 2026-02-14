@@ -54,11 +54,32 @@ The app follows the **MVVM** architecture to ensure separation of concerns and t
 
 
 ## 🔧 Setup & Installation
-Clone the repository:
-git clone [https://github.com/YOUR_USERNAME/SubTrack.git](https://github.com/NirAvraham1/SubTrack.git)
-Open the project in Android Studio.
-Add your API Keys in local.properties (Gemini API Key).
-Sync Gradle and Run on an Emulator/Device.
+
+Follow these steps to get the project running on your local machine:
+
+1.  **Clone the repository**
+    Open your terminal and run:
+    ```bash
+    git clone [https://github.com/NirAvraham1/SubTrack.git](https://github.com/NirAvraham1/SubTrack.git)
+    ```
+
+2.  **Open in Android Studio**
+    * Open Android Studio.
+    * Select **Open an existing Android Studio project**.
+    * Navigate to the cloned folder.
+
+3.  **Configure API Keys**
+    The project uses **Google Gemini AI**. To make it work, you need to add your API key:
+    * Open the `local.properties` file in the root directory (if it doesn't exist, create it).
+    * Add the following line:
+    ```properties
+    GEMINI_API_KEY="YOUR_API_KEY_HERE"
+    ```
+
+4.  **Build & Run**
+    * Wait for Gradle to finish syncing.
+    * Select an Emulator or connect a physical Android device.
+    * Click the **Run** ▶️ button.
 
 ## 👨‍💻 Author
 Nir Avraham Computer Science Student @ Afeka College
